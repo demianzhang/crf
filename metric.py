@@ -2,20 +2,32 @@ from reader import labels_to_id as labels
 bset = set()
 iset = set()
 oset = set()
-bset.add(labels['B-PLACE'])
-bset.add(labels['B-PERSON'])
-bset.add(labels['B-ORGANIZATION'])
-bset.add(labels['B-OTHERPROPNOUN'])
-iset.add(labels['I-PLACE'])
-iset.add(labels['I-PERSON'])
-iset.add(labels['I-ORGANIZATION'])
-iset.add(labels['I-OTHERPROPNOUN'])
+bset.add(labels['B-PER.NOM'])
+bset.add(labels['B-PER.NAM'])
+bset.add(labels['B-ORG.NAM'])
+bset.add(labels['B-GPE.NAM'])
+bset.add(labels['B-LOC.NAM'])
+bset.add(labels['B-LOC.NOM'])
+bset.add(labels['B-ORG.NOM'])
+bset.add(labels['B-GPE.NOM'])
+iset.add(labels['I-PER.NOM'])
+iset.add(labels['I-PER.NAM'])
+iset.add(labels['I-ORG.NAM'])
+iset.add(labels['I-GPE.NAM'])
+iset.add(labels['I-LOC.NAM'])
+iset.add(labels['I-LOC.NOM'])
+iset.add(labels['I-ORG.NOM'])
+iset.add(labels['I-GPE.NOM'])
 oset.add(labels['O'])
 
-b_i = dict([(labels['B-PLACE'], labels['I-PLACE']), 
-          (labels['B-PERSON'], labels['I-PERSON']), 
-          (labels['B-ORGANIZATION'], labels['I-ORGANIZATION']), 
-          (labels['B-OTHERPROPNOUN'], labels['I-OTHERPROPNOUN'])])
+b_i = dict([(labels['B-PER.NOM'], labels['I-PER.NOM']),
+          (labels['B-PER.NAM'], labels['I-PER.NAM']), 
+          (labels['B-ORG.NAM'], labels['I-ORG.NAM']),
+          (labels['B-GPE.NAM'], labels['I-GPE.NAM']),
+          (labels['B-LOC.NAM'], labels['I-LOC.NAM']), 
+          (labels['B-LOC.NOM'], labels['I-LOC.NOM']), 
+          (labels['B-ORG.NOM'], labels['I-ORG.NOM']),
+          (labels['B-GPE.NOM'], labels['I-GPE.NOM'])])
 
 def precision_recall(pred, pred_length, truth, truth_length,
     bset=bset, iset=iset, oset=oset):

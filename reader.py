@@ -1,9 +1,11 @@
 import numpy
 import os
+import codecs as cs
 import pickle
 
-labels = ['O', 'B-PLACE', 'I-PLACE', 'B-PERSON', 'I-PERSON', 'B-ORGANIZATION',
-    'I-ORGANIZATION', 'B-OTHERPROPNOUN', 'I-OTHERPROPNOUN']
+labels = ['O', 'B-PER.NOM', 'I-PER.NOM','B-PER.NAM', 'I-PER.NAM', 'B-ORG.NAM',
+    'I-ORG.NAM', 'B-GPE.NAM', 'I-GPE.NAM','B-LOC.NAM','I-LOC.NAM','B-LOC.NOM','I-LOC.NOM',
+    'B-ORG.NOM','I-ORG.NOM','B-GPE.NOM','I-GPE.NOM']
 id_to_labels = dict(enumerate(labels))
 labels_to_id = dict((v,i) for i, v in enumerate(labels))
 
@@ -12,31 +14,30 @@ def load(data_file = "ner_data2.pkl"):
     return pickle.load(open(data_file, 'rb'))
 
   word_set = set()
-  def load_file(filename, build_dict=False):
-    X = []
-    Y = []
-    with open(filename, 'r') as fin:
-      _x = []
-      _y = []
-      for r in fin.readlines():
-        if len(r.strip()) == 0:
-          if len(_x) >0:
-            X.append(_x)
-            Y.append(numpy.asarray(_y))
-            _x = []
-            _y = []
-        else:
-          cells = r.split()
-          _x.append(cells[5])
-          _y.append(labels_to_id[cells[0]])
-          if build_dict:
-            word_set.add(cells[5])
-    return X, Y
-
-  train_x, train_y = load_file('/home/hadoop/data/ner/train_new', build_dict=True)
-  test_x, test_y = load_file('/home/hadoop/data/ner/test_new')
+  def load_file(fn, build_dict=True,has_label=True):
+    with cs.open(fn, encoding='utf-8') as src:
+        stream = src.read().strip().split('\n\n')
+        corpus = []
+        labels = []
+        for line in stream:
+            line = line.strip().split('\n')
+            sentc = []
+            label = []
+            for e in line:
+                token = e.split()
+                sentc.append(token[0])
+                if has_label:
+                    label.append(labels_to_id[token[-1]])
+                else:
+                    label.append(None)
+                if build_dict:
+                    word_set.add(token[0])
+            corpus.append(sentc)
+            labels.append(label)
+    return corpus, labels
+  train_x, train_y = load_file('weiboNER_2nd_conll.train', build_dict=True, has_label=True)
+  test_x, test_y = load_file('weiboNER_2nd_conll.dev')
   word_to_id = dict((w, i) for i, w in enumerate(word_set))
-
   print('total words: ', len(word_to_id))
   print('train set size: ', len(train_x))
   print('test set size: ', len(test_x))
@@ -56,3 +57,4 @@ def load(data_file = "ner_data2.pkl"):
     pickle.dump((trainX, trainY, testX, testY, word_to_id, labels_to_id), fout)
 
   return trainX, trainY, testX, testY, word_to_id, labels_to_id
+

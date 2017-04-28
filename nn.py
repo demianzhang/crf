@@ -1,5 +1,6 @@
 import numpy
 import os
+import codecs 
 #os.environ["THEANO_FLAGS"] = 'floatX=float32,device=gpu0,lib.cnmem=0'
 #os.environ["THEANO_FLAGS"] = 'floatX=float32,device=gpu1,lib.cnmem=0'
 import theano
@@ -17,6 +18,31 @@ floatX = theano.config.floatX
 def uniform_init(shape):
   return numpy.random.uniform(low=-0.1, high=0.1, size=shape).astype(floatX)
 
+def read_matrix_from_file(fn, dic, ecd='utf-8'):
+    multiplier = numpy.sqrt(1.0/3)
+    not_in_dict = 0
+    with codecs.open(fn, encoding=ecd, errors='ignore') as inf:
+        row, column = inf.readline().rstrip().split()
+        dim = int(column)
+        #print row, column
+        idx_map = dict()
+        line_count = 0
+        M = uniform_init((len(dic), dim))
+        for line in inf:
+            elems = line.rstrip().split(' ')
+            if elems[0] in dic:
+                idx = dic[elems[0]]
+                vec_elem = elems[1:]
+                r = numpy.array([float(_e) for _e in vec_elem])
+                M[idx] = (r/numpy.linalg.norm(r)) * multiplier 
+                idx_map[idx] = line_count
+            else:
+                not_in_dict += 1
+            line_count += 1
+        print 'load embedding! %s words, %d not in the dictionary. Dictionary size: %d' %(row, not_in_dict, len(dic))
+        #print M.shape, len(idx_map)
+        return M
+
 class Abc():
   def __init__(self):
     self._params = []
@@ -29,8 +55,9 @@ class Abc():
 
 
 class Embedding(Abc):
-  def __init__(self, input_size, embedding_size):
-    self.W = shared(uniform_init((input_size, embedding_size)))
+  def __init__(self, fn, dic):
+    self.W = shared(read_matrix_from_file(fn, dic))
+    # self.W = shared(uniform_init((input_size, embedding_size)))
     self._params = self.W
 
   def __call__(self, input):
@@ -75,10 +102,15 @@ class LSTM(Abc):
       _x = tensor.concatenate([numpy.asarray([1.], dtype=numpy.float32), _in, _m])
       ifog = tensor.dot(_x, self.W)
 
-      i = tensor.nnet.sigmoid(ifog[ : nh])
-      f = tensor.nnet.sigmoid(ifog[nh : 2*nh])
-      o = tensor.nnet.sigmoid(ifog[2*nh : 3*nh])
-      g = tensor.tanh(ifog[3*nh : ])
+      # i = tensor.nnet.sigmoid(ifog[ : nh])
+      # f = tensor.nnet.sigmoid(ifog[nh : 2*nh])
+      # o = tensor.nnet.sigmoid(ifog[2*nh : 3*nh])
+      # g = tensor.tanh(ifog[3*nh : ])
+      
+      i = tensor.nnet.sigmoid(ifog[ : 100])
+      f = tensor.nnet.sigmoid(ifog[100 : 200])
+      o = tensor.nnet.sigmoid(ifog[200 : 300])
+      g = tensor.tanh(ifog[300 : 400])
 
       _c = f * _c + i * g
       _m = o * _c
