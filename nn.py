@@ -101,11 +101,6 @@ class LSTM(Abc):
     def _step(_in, _m, _c, nh):
       _x = tensor.concatenate([numpy.asarray([1.], dtype=numpy.float32), _in, _m])
       ifog = tensor.dot(_x, self.W)
-
-      # i = tensor.nnet.sigmoid(ifog[ : nh])
-      # f = tensor.nnet.sigmoid(ifog[nh : 2*nh])
-      # o = tensor.nnet.sigmoid(ifog[2*nh : 3*nh])
-      # g = tensor.tanh(ifog[3*nh : ])
       
       i = tensor.nnet.sigmoid(ifog[ : 100])
       f = tensor.nnet.sigmoid(ifog[100 : 200])
@@ -113,7 +108,7 @@ class LSTM(Abc):
       g = tensor.tanh(ifog[300 : 400])
 
       _c = f * _c + i * g
-      _m = o * _c
+      _m = o * tensor.tanh(_c)
       return _m, _c
     self._step = _step
 
