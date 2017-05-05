@@ -22,11 +22,11 @@ python train_emb.py
 ## Model  
 ```bash  
 dropout_layer -> lstm_layer -> tanh -> fc_layer -> crf  
-MomentumSGD
+MomentumSGD | RMSprop
 ```
 ## Result on test
 ```bash
-precision: 0.661  
-recall: 0.475  
-f1: 0.553
+precision: 0.675  
+recall: 0.486  
+f1: 0.563
 ```
